@@ -128,7 +128,7 @@ class running(threading.Thread):
     def __init__(self):
         super().__init__()
         df = pd.read_csv(
-            'data\METR-LA.csv')
+            'G:\北京理工大学学习课程\学期二\数据挖掘\Beijing-Traffic-Track-Data-Mining-master\Beijing-Traffic-Track-Data-Mining-master\METR-LA.csv')
         self.output = 0
         window_size = 10
         # df = df.drop(columns='Unnamed: 0')
@@ -161,7 +161,7 @@ class running(threading.Thread):
         self.model = GRUPredictor(207,108,207)
         # self.model = BiLSTMPredictor(207,108,207)
         self.model.load_state_dict(torch.load(
-            '1715064525lr_0.0001ws_10epoch_300\GRU.pt',map_location=torch.device('cuda:0')))
+            'G:\北京理工大学学习课程\学期二\数据挖掘\Beijing-Traffic-Track-Data-Mining-master\Beijing-Traffic-Track-Data-Mining-master\GRU.pt',map_location=torch.device('cuda:0')))
         self.input = test_seq
 
         self._stop_event = threading.Event()
@@ -218,10 +218,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.generator = running()
         self.generator.start()
-        self.flag3 = 0
+
 
         df = pd.read_csv(
-            'data\METR-LA.csv')[-11:]
+            'G:\北京理工大学学习课程\学期二\数据挖掘\Beijing-Traffic-Track-Data-Mining-master\Beijing-Traffic-Track-Data-Mining-master\METR-LA.csv')[-11:]
 
         df = df.drop(columns='Unnamed: 0')
         df = df.loc[~(df == 0).all(axis=1)]
@@ -246,10 +246,10 @@ class MainWindow(QMainWindow):
                 x.append(tra)
         trajectory = x
         self.seq = torch.tensor(np.array(trajectory), dtype=torch.float32).to(device)
-        self.model = torch.load('1715064525lr_0.0001ws_10epoch_300\BiLSTMPredictor.pt')
+        self.model = torch.load('G:\北京理工大学学习课程\学期二\数据挖掘\Beijing-Traffic-Track-Data-Mining-master\Beijing-Traffic-Track-Data-Mining-master\BiLSTMPredictor.pt')
 
         self.setWindowTitle("Data Visualization")
-        self.setGeometry(400, 300, 1350, 800)
+        self.setGeometry(400, 300, 1600, 1200)
 
         # Load background image
         self.background = QLabel(self)
@@ -258,12 +258,11 @@ class MainWindow(QMainWindow):
 
         # Entry widget for ID input
         self.id_entry = QLineEdit(self)
-        self.id_entry.setGeometry(450, 600, 200,100)
+        self.id_entry.setGeometry(200,250, 200,100)
 
         # Button to show line plot
         self.show_plot_button = QPushButton("显示", self)
-
-        self.show_plot_button.setGeometry(675, 600, 200, 100)
+        self.show_plot_button.setGeometry(200,400, 200, 100)
         self.show_plot_button.clicked.connect(self.show_line_plot)
 
         # Sample data
@@ -271,13 +270,12 @@ class MainWindow(QMainWindow):
         self.y = trajectory[-1]
 
         self.label = QtWidgets.QLabel(self)
-        # quanju weizhi daxiao
-        self.label.setGeometry(QtCore.QRect(50, 50, 600, 400))
+        self.label.setGeometry(QtCore.QRect(600, 50, 800, 600))
 
         self.canvas = MyMatplotlibFigure(width = 6,height = 4,dpi =100)
 
         self.canvas.mat_plot_drow_axes(self.x,self.y)
-        self.canvas.figs.suptitle("Global real-time traffic forecasting")
+        self.canvas.figs.suptitle("log")
 
         # self.plot_button = QPushButton("Plot Data", self)
         # self.plot_button.setGeometry(50, 50, 100, 30)
@@ -294,13 +292,21 @@ class MainWindow(QMainWindow):
         self.timer.start(3000)
 
         self.label2 = QtWidgets.QLabel(self)
-        # dan dian
-        self.label2.setGeometry(QtCore.QRect(700, 50, 600, 400))
+        self.label2.setGeometry(QtCore.QRect(600, 600, 800, 600))
         self.canvas2 = MyMatplotlibFigure(width = 6,height = 4,dpi =100)
         self.hboxlayout2 = QtWidgets.QHBoxLayout(self.label2)
-        self.canvas2.figs.suptitle("Local real-time traffic forecasting")
 
-        # Button to plot data
+
+
+        # # Button to plot data
+
+
+
+
+
+
+
+
     def plot_data(self):
         if (self.flag2+1) % 32 == 0:
             self.flag1 += 1
@@ -312,7 +318,7 @@ class MainWindow(QMainWindow):
         self.y = self.generator.predictions[self.flag1][self.flag2].to('cpu')
         self.canvas = MyMatplotlibFigure(width=6, height=4, dpi=100)
         self.canvas.mat_plot_drow_axes(self.x,self.y.squeeze(0).numpy().tolist())
-        # self.canvas.figs.suptitle("Global Real-time Traffic")
+        self.canvas.figs.suptitle("log")
         self.hboxlayout.addWidget(self.canvas)
 
     def show_line_plot(self):
@@ -330,8 +336,7 @@ class MainWindow(QMainWindow):
             # self.set CentralWidget(canvas)
             x = []
             data = []
-            self.flag3 += 1
-            get = self.generator.predictions[self.flag3].to('cpu')
+            get = self.generator.predictions[self.flag1].to('cpu')
             get = get.numpy().tolist()
             # for i in range(len(get)):
             #     if i % 300 == 0:
@@ -342,7 +347,7 @@ class MainWindow(QMainWindow):
                 x.append(i)
                 data.append(get[i][id-1])
             self.canvas2.mat_plot_drow_axes(x,data)
-            self.canvas2.figs.suptitle("Local")
+            self.canvas2.figs.suptitle("data-time")
             self.hboxlayout2.addWidget(self.canvas2)
 
         except ValueError:
